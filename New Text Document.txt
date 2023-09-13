@@ -1,0 +1,284 @@
+Public Class EndScreen
+    Private Sub EndScreen_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        lblFinaScore.Text = ("Final score: " + finalscore)
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        Form1.Show()
+        Me.Hide()
+    End Sub
+
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        Dim file As System.IO.StreamWriter
+        file = My.Computer.FileSystem.OpenTextFileWriter("E:\NEA\NEA\NEA\bin\Debug\Leaderboard.txt", True)
+        file.WriteLine(playername + "|" + finalscore)
+        file.Close()
+    End Sub
+End Class
+
+
+
+Imports System.IO
+Imports System.Net
+Imports System.Text.RegularExpressions
+
+
+Public Class Quiz
+    Private rnd As New Random()
+    Private correcta As String
+    Private numOq As Decimal
+    Private answered As Boolean = False
+    Dim request As WebRequest
+
+    Private Sub quiz_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        lblPlayername.Text = ("Player name: " + playername)
+        ' Keeps track of the logged in user throughout the game for score keeping
+        lblscore.Text = ("Score: " + "0" + "/" + "0")
+        ' Resets the lable that keeps track of the score when in the game
+
+        numOq = selectchoice / 100
+        'MsgBox(numOq) [FOR TESTING]
+        selectchoice = selectchoice Mod 100
+        'MsgBox(selectchoice) [FOR TESTING]
+        selectchoice = selectchoice / 100
+        'MsgBox(selectchoice) [FOR TESTING]
+        numOq = numOq - selectchoice
+        'MsgBox(numOq) [FOR TESTING]
+        selectchoice = selectchoice * 100
+        'MsgBox(selectchoice) [FOR TESTING]
+
+        If numOq = 1 Then
+            numOfQleft = 5
+        ElseIf numOq = 2 Then
+            numOfQleft = 10
+        ElseIf numOq = 3 Then
+            numOfQleft = 15
+        ElseIf numOq = 4 Then
+            numOfQleft = 20
+        End If
+        numOfQleftTotal = numOfQleft
+    End Sub
+
+    Private Sub loopquestions()
+        If numOfQleft < 1 Then
+            finalscore = (score.ToString + "/" + numOfQleftTotal.ToString)
+            EndScreen.Show()
+            Me.Hide()
+        Else
+            FetchQuestions()
+        End If
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles btnClickToStart.Click
+        btnClickToStart.Hide()
+        loopquestions()
+    End Sub
+
+    Private Sub FetchQuestions()
+        If selectchoice < 1 Then
+            MsgBox("Error", MsgBoxStyle.Exclamation)
+        ElseIf selectchoice = 11 Then
+            request = WebRequest.Create("https://opentdb.com/api.php?amount=1&category=18&difficulty=easy&type=multiple")
+        ElseIf selectchoice = 12 Then
+            request = WebRequest.Create("https://opentdb.com/api.php?amount=1&category=18&difficulty=medium&type=multiple")
+        ElseIf selectchoice = 13 Then
+            request = WebRequest.Create("https://opentdb.com/api.php?amount=1&category=18&difficulty=hard&type=multiple")
+        ElseIf selectchoice = 21 Then
+            request = WebRequest.Create("https://opentdb.com/api.php?amount=1&category=22&difficulty=easy&type=multiple")
+        ElseIf selectchoice = 22 Then
+            request = WebRequest.Create("https://opentdb.com/api.php?amount=1&category=22&difficulty=medium&type=multiple")
+        ElseIf selectchoice = 23 Then
+            request = WebRequest.Create("https://opentdb.com/api.php?amount=1&category=22&difficulty=hard&type=multiple")
+        ElseIf selectchoice = 31 Then
+            request = WebRequest.Create("https://opentdb.com/api.php?amount=1&category=23&difficulty=easy&type=multiple")
+        ElseIf selectchoice = 32 Then
+            request = WebRequest.Create("https://opentdb.com/api.php?amount=1&category=23&difficulty=medium&type=multiple")
+        ElseIf selectchoice = 33 Then
+            request = WebRequest.Create("https://opentdb.com/api.php?amount=1&category=23&difficulty=hard&type=multiple")
+        ElseIf selectchoice = 41 Then
+            request = WebRequest.Create("https://opentdb.com/api.php?amount=1&category=24&difficulty=easy&type=multiple")
+        ElseIf selectchoice = 42 Then
+            request = WebRequest.Create("https://opentdb.com/api.php?amount=1&category=24&difficulty=medium&type=multiple")
+        ElseIf selectchoice = 43 Then
+            request = WebRequest.Create("https://opentdb.com/api.php?amount=1&category=24&difficulty=hard&type=multiple")
+        End If
+
+        Dim array(3)
+
+        Dim response As WebResponse = request.GetResponse()
+        ' Display the status.
+        txtstatus.Text = CType(response, HttpWebResponse).StatusDescription
+        ' Get the stream containing content returned by the server.
+        Dim dataStream As Stream = response.GetResponseStream()
+        ' Open the stream using a StreamReader for easy access.
+        Dim reader As New StreamReader(dataStream)
+        ' Read the content.
+        Dim responseFromServer As String = reader.ReadToEnd()
+        ' Display the content.
+        txtTest.Text = responseFromServer
+        ' Clean up the streams and the response.
+        reader.Close()
+        response.Close()
+
+        Dim sSource As String = responseFromServer 'String that is being searched
+        Dim sDelimStart As String = "correct_answer" 'First delimiting word
+        Dim sDelimEnd As String = "incorrect_answers" 'Second delimiting word
+        Dim nIndexStart As Integer = sSource.IndexOf(sDelimStart) 'Find the first occurrence of f1
+        Dim nIndexEnd As Integer = sSource.IndexOf(sDelimEnd) 'Find the first occurrence of f2
+
+        Dim wsDelimStart As String = "incorrect_answers" 'First delimiting word
+        Dim wsDelimEnd As String = "]" 'Second delimiting word
+        Dim wnIndexStart As Integer = sSource.IndexOf(wsDelimStart) 'Find the first occurrence of f1
+        Dim wnIndexEnd As Integer = sSource.IndexOf(wsDelimEnd) 'Find the first occurrence of f2
+
+        Dim qsDelimStart As String = "question" 'First delimiting word
+        Dim qsDelimEnd As String = "correct_answer" 'Second delimiting word
+        Dim qnIndexStart As Integer = sSource.IndexOf(qsDelimStart) 'Find the first occurrence of f1
+        Dim qnIndexEnd As Integer = sSource.IndexOf(qsDelimEnd) 'Find the first occurrence of f2
+
+        If nIndexStart > -1 AndAlso nIndexEnd > -1 Then '-1 means the word was not found.
+            Dim resC As String = Strings.Mid(sSource, nIndexStart + sDelimStart.Length + 1, nIndexEnd - nIndexStart - sDelimStart.Length) 'Crop the text between
+            Dim resW As String = Strings.Mid(sSource, wnIndexStart + wsDelimStart.Length + 1, wnIndexEnd - wnIndexStart - wsDelimStart.Length) 'Crop the text between
+            Dim resQ As String = Strings.Mid(sSource, qnIndexStart + qsDelimStart.Length + 1, qnIndexEnd - qnIndexStart - qsDelimStart.Length) 'Crop the text between
+
+            Dim acceptedChars() As Char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&1234567890' <>".ToCharArray
+            Dim acceptedWrongChars() As Char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&,1234567890' <>".ToCharArray
+            Dim acceptedQuestionChars() As Char = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ&1234567890' <>".ToCharArray
+            Dim correctanswer As String
+            Dim wronganswers As String
+            Dim question As String
+            correctanswer = (From ch As Char In resC Select ch Where acceptedChars.Contains(ch)).ToArray
+            wronganswers = (From ch As Char In resW Select ch Where acceptedWrongChars.Contains(ch)).ToArray
+            question = (From ch As Char In resQ Select ch Where acceptedQuestionChars.Contains(ch)).ToArray
+            lblquestion.Text = question
+            Dim split = wronganswers.Split(",")
+            array(0) = correctanswer
+            array(1) = split(0)
+            array(2) = split(1)
+            array(3) = split(2)
+            correcta = correctanswer
+
+            Dim j As Int32
+            Dim temp As String
+
+            For n As Int32 = array.Length - 1 To 0 Step -1
+                j = rnd.Next(0, n + 1)
+                ' Swap them.
+                temp = array(n)
+                array(n) = array(j)
+                array(j) = temp
+            Next n
+
+            btna2.Text = array(1)
+            btna3.Text = array(2)
+            btna4.Text = array(3)
+            btna1.Text = array(0)
+        Else
+            MessageBox.Show("Error")
+        End If
+    End Sub
+
+    Private Sub buttonanswers(sender As Object, e As EventArgs) Handles btna2.Click, btna3.Click, btna4.Click, btna1.Click, btnskip
+        Dim button = CType(sender, Button)
+        Dim buttontag = Val(button.Tag)
+        Dim choice As String
+
+        If buttontag = 1 Then
+            choice = btna1.Text
+        End If
+        If buttontag = 2 Then
+            choice = btna2.Text
+        End If
+        If buttontag = 3 Then
+            choice = btna3.Text
+        End If
+        If buttontag = 4 Then
+            choice = btna4.Text
+        End If
+        If buttontag = 5 Then
+            Dim result As DialogResult = MessageBox.Show("message", "caption", MessageBoxButtons.YesNo
+            If result = DialogResult.Yes Then
+            Else
+
+            End If
+
+            scoreForLable = scoreForLable + 1
+            score = score - 1
+            scoreForLable = score
+            lblscore.Text = ("Score: " + scoreForLable + "/" + numOfQleftForLable)
+        End If
+
+        If choice = correcta Then
+            numOfQleft = numOfQleft - 1
+            numOfQleftForLable = numOfQleftForLable + 1
+            score = score + 1
+            scoreForLable = score
+            lblscore.Text = ("Score: " + scoreForLable + "/" + numOfQleftForLable)
+            loopquestions()
+
+            MsgBox("Correct")
+        Else
+            numOfQleft = numOfQleft - 1
+            numOfQleftForLable = numOfQleftForLable + 1
+            scoreForLable = score
+            lblscore.Text = ("Score: " + scoreForLable + "/" + numOfQleftForLable)
+            loopquestions()
+
+            MsgBox("Wrong")
+        End If
+    End Sub
+
+
+End Class
+
+
+
+
+
+
+
+
+
+
+Imports System.Threading
+
+Public Class Form1
+    Dim loggedin As Boolean
+    Dim logincheck As Integer
+    Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        loggedin = False
+        logincheck = 0
+        btnStart.Enabled = False
+
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles btnStart.Click
+        If (isloggedin > 0) Then
+            loggedin = True
+        ElseIf (isloggedin < 0) Then
+            loggedin = False
+        End If
+        If loggedin = False Then
+            MsgBox("You need to log in before you can continue")
+        ElseIf loggedin = True Then
+            Gamechoice.Show()
+            Me.Hide()
+        End If
+    End Sub
+
+    Private Sub btnLogin_Click(sender As Object, e As EventArgs) Handles btnLogin.Click
+        login.Show()
+    End Sub
+
+    Private Sub Button1_Click_1(sender As Object, e As EventArgs) Handles Button1.Click
+        Me.Hide()
+        Gamechoice.Show()
+    End Sub
+
+    Private Sub Delay()
+        Dim icount As Integer = 1
+        For icount = 1 To 1000000
+            icount = icount + 1
+        Next
+    End Sub
+End Class
