@@ -2,6 +2,7 @@
 <img alt="Logo Banner" src="https://raw.githubusercontent.com/IPQow/quizgame-nea/master/screenshots/92%20Logo%20Header.png"/>
 <br/>
 <br/>
+
 ## About the project
 
 This project was created for my A-level computer science NEA, it is a quiz application that uses the `opentdb.com` API to fetch questions and then present them to the user and randomise the answer.
