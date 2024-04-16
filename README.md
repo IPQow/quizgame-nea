@@ -38,7 +38,7 @@ Post-quiz screen that shows score
 ![Revision Tips page](https://raw.githubusercontent.com/IPQow/quizgame-nea/master/screenshots/91%20RevisionTipsBack.PNG)
 Revision Tips page
 
-## Defencive tests
+## Defensive tests
 
 As part of the task outlines, we needed to implement defensive measures, below is an example of the defensive measures that are used.
 
